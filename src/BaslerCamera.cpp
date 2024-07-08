@@ -282,12 +282,12 @@ Camera::Camera(const std::string& camera_id,int packet_size,int receive_priority
 	//fast basler models do not support 1.0 second exposure but lower value
 	double exp_time = min(1.0, max_exp);
 	setExpTime(exp_time);
-        // Get the image buffer size
-        DEB_TRACE() << "Get the image buffer size";
-        ImageSize_ = (size_t)(Camera_->PayloadSize.GetValue());
-               
-        m_acq_thread = new _AcqThread(*this);
-        m_acq_thread->start();
+    // Get the image buffer size
+    DEB_TRACE() << "Get the image buffer size";
+    ImageSize_ = (size_t)(Camera_->PayloadSize.GetValue());
+           
+    m_acq_thread = new _AcqThread(*this);
+    m_acq_thread->start();
     }
     catch (Pylon::GenericException &e)
     {
@@ -870,6 +870,38 @@ void Camera::getTrigActivation(TrigActivation& activation) const
     }
 }
 
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Camera::setTrigDelay(unsigned int delay)
+{
+    DEB_MEMBER_FUNCT();
+    DEB_TRACE()<<"setTrigDelay : "<<delay;
+    try
+    {
+        Camera_->TriggerDelay.SetValue(delay);
+    }
+    catch (Pylon::GenericException &e)
+    {
+        DEB_WARNING() << e.GetDescription();
+    }
+}
+
+//-----------------------------------------------------
+//
+//-----------------------------------------------------
+void Camera::getTrigDelay(unsigned int & delay)
+{
+    DEB_MEMBER_FUNCT();
+    try
+    {
+        delay = Camera_->TriggerDelay.GetValue();
+    }
+    catch (Pylon::GenericException &e)
+    {
+        DEB_WARNING() << e.GetDescription();
+    }
+}
 //-----------------------------------------------------
 //
 //-----------------------------------------------------

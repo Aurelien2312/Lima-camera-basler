@@ -120,6 +120,9 @@ class LIBBASLER_API Camera
 
     void setTrigActivation(TrigActivation activation);
     void getTrigActivation(TrigActivation& activation) const;
+    
+    void setTrigDelay(unsigned int delay);
+    void getTrigDelay(unsigned int& delay);
 
     void setExpTime(double  exp_time);
     void getExpTime(double& exp_time);
