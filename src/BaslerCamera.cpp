@@ -200,7 +200,14 @@ Camera::Camera(const std::string& camera_id,int packet_size,int receive_priority
         DEB_TRACE() << "Set the image format and AOI";
 	// basler model string last character codes for color (c) or monochrome (m)
 	std::list<string> formatList;
-
+#ifdef VIDEO_COLOR_DISABLED
+        {
+    	formatList.push_back(string("Mono16"));
+	    formatList.push_back(string("Mono12"));
+	    formatList.push_back(string("Mono8"));
+	    m_color_flag = false;
+        }
+#else
 	if (m_detector_model.find("gc") != std::string::npos ||
 	    m_detector_model.find("uc") != std::string::npos
 	    )
@@ -226,6 +233,7 @@ Camera::Camera(const std::string& camera_id,int packet_size,int receive_priority
 	    formatList.push_back(string("Mono8"));
 	    m_color_flag = false;
 	  }
+#endif
 
         bool formatSetFlag = false;
 	for(list<string>::iterator it = formatList.begin(); it != formatList.end(); it++)
@@ -527,7 +535,7 @@ void Camera::_AcqThread::threadFunction()
 		void *framePt = buffer_mgr.getFrameBufferPtr(m_cam.m_image_number);
 		const FrameDim& fDim = buffer_mgr.getFrameDim();
 		void* srcPt = ((char*)pImageBuffer);
-		DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
+		////DEB_TRACE() << "memcpy:" << DEB_VAR2(srcPt,framePt);
 		memcpy(framePt,srcPt,fDim.getMemSize());
 		
 		continueAcq = buffer_mgr.newFrameReady(frame_info);                      
@@ -1053,8 +1061,8 @@ void Camera::getExposureTimeRange(double& min_expo, double& max_expo)
                 min_expo = Camera_->ExposureTimeAbs.GetMin()*1e-6;
                 max_expo = Camera_->ExposureTimeAbs.GetMax()*1e-6;
           }
-            DEB_TRACE() << "min_expo = " << min_expo << " (s)";
-            DEB_TRACE() << "max_expo = " << max_expo << " (s)";
+          DEB_TRACE() << "min_expo = " << min_expo << " (s)";
+          DEB_TRACE() << "max_expo = " << max_expo << " (s)";
         }
     }
     catch (Pylon::GenericException &e)
@@ -1737,6 +1745,8 @@ void Camera::setGain(double gain)
 	    if (Camera_->GetSfncVersion() >= Sfnc_2_0_0) 
         {
 	        //ACE2
+            //DEB_TRACE() <<">= Sfnc_2_0_0";
+            Camera_->GainSelector.SetValue(GainSelector_All);	    
             low_limit = Camera_->Gain.GetMin();
             high_limit = Camera_->Gain.GetMax();
             raw_gain = int((high_limit - low_limit) * gain + low_limit);
@@ -1744,16 +1754,18 @@ void Camera::setGain(double gain)
         }
         else
         {
-            Camera_->GainSelector.SetValue(GainSelector_All);
-	    
+            //DEB_TRACE() <<"< Sfnc_2_0_0";
+            Camera_->GainSelector.SetValue(GainSelector_All);	    
             low_limit = Camera_->GainRaw.GetMin();
             high_limit = Camera_->GainRaw.GetMax();
-            raw_gain = int((high_limit - low_limit) * gain + low_limit);
+            raw_gain = int((high_limit - low_limit) * gain + low_limit);      
             Camera_->GainRaw.SetValue(raw_gain);
         }
-        //DEB_TRACE() << "low_limit   = " << low_limit;
-        //DEB_TRACE() << "high_limit = " << high_limit;
-        //DEB_TRACE() << "raw_gain    = " << raw_gain;
+        
+        //DEB_TRACE() << "gain = " << gain;
+        //DEB_TRACE() << "low_limit = " << low_limit;
+        //DEB_TRACE() << "high_limit = " << high_limit;        
+        //DEB_TRACE() << "raw_gain = " << raw_gain;
     }
     catch (Pylon::GenericException &e)
     {
@@ -1787,10 +1799,11 @@ void Camera::getGain(double& gain)
 	        high_limit = Camera_->GainRaw.GetMax();
         }
         
+        gain = double(raw_gain - low_limit)/double(high_limit - low_limit);
+        //DEB_TRACE() << "gain = " << gain;
         //DEB_TRACE() << "low_limit = " << low_limit;
         //DEB_TRACE() << "high_limit = " << high_limit;
-        //DEB_TRACE() << "raw_gain    = " << raw_gain;
-        gain = double(raw_gain - low_limit)/double(high_limit - low_limit);
+        //DEB_TRACE() << "raw_gain    = " << raw_gain;        
 
     }
     catch (Pylon::GenericException &e)

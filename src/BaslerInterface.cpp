@@ -51,9 +51,13 @@ Interface::Interface(Camera& cam,bool force_video_mode) :
 	m_cam._forceVideoMode(true);
       }
       m_video = new VideoCtrlObj(cam);
+      DEB_TRACE() << "Capability Video is Enabled !";
     }
   else
+  {
     m_video = NULL;
+    DEB_TRACE() << "Capability Video is Disabled !";
+  }
 }
 
 Interface::~Interface()
