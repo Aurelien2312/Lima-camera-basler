@@ -32,11 +32,11 @@ using namespace lima::Basler;
 
 
 Interface::Interface(Camera& cam,bool force_video_mode) :
-  m_cam(cam)
+  m_cam(cam),
+  m_sync(cam)
 {
   DEB_CONSTRUCTOR();
   m_det_info = new DetInfoCtrlObj(cam);
-  m_sync = new SyncCtrlObj(cam);
   m_roi = new RoiCtrlObj(cam);
   m_bin = new BinCtrlObj(cam);
   bool has_video_capability;
@@ -47,25 +47,24 @@ Interface::Interface(Camera& cam,bool force_video_mode) :
 	// for greyscale camera but for having true video interface
 	// with gain/autogain and other true video features available
 	// one can force here for video interface.
-	m_cam._allocColorBuffer();
-	m_cam._initColorStreamGrabber();
+	DEB_ALWAYS() << "Ok force video cap. for a B/W camera";
+	m_cam._forceVideoMode(true);
       }
       m_video = new VideoCtrlObj(cam);
+      DEB_TRACE() << "Capability Video is Enabled !";
     }
   else
   {
     m_video = NULL;
+    DEB_TRACE() << "Capability Video is Disabled !";
   }
-  //event capability
-  m_event = m_cam.getEventCtrlObj();
- 
 }
 
 Interface::~Interface()
 {
   DEB_DESTRUCTOR();
   delete m_det_info;
-  delete m_sync;
+  
   delete m_roi;
   delete m_bin;
   delete m_video;
@@ -86,16 +85,14 @@ void Interface::getCapList(CapList &cap_list) const
       cap_list.push_back(HwCap(buffer));
     }
 
-  cap_list.push_back(HwCap(m_sync));
-
+	HwSyncCtrlObj *sync = &m_sync;
+    cap_list.push_back(HwCap(sync));
+    
   if(m_cam.isRoiAvailable())
     cap_list.push_back(HwCap(m_roi));
 
   if(m_cam.isBinningAvailable())
     cap_list.push_back(HwCap(m_bin));
-  
-  //event capability
-  cap_list.push_back(HwCap(m_event));	   
 }
 
 void Interface::reset(ResetLevel reset_level)
