@@ -1570,6 +1570,24 @@ bool Camera::isBandWidthAssigned() const
 }
 
 //-----------------------------------------------------
+// isMaxThroughputAvailable
+//-----------------------------------------------------
+bool Camera::isMaxThroughputAvailable() const
+{
+    //ACE2
+    return GenApi::IsAvailable(Camera_->DeviceLinkThroughputLimit);
+}
+
+//-----------------------------------------------------
+// isCurrentThroughputAvailable
+//-----------------------------------------------------
+bool Camera::isCurrentThroughputAvailable() const
+{
+    //ACE2
+    return GenApi::IsAvailable(Camera_->BslDeviceLinkCurrentThroughput);
+}
+
+//-----------------------------------------------------
 // isAutoGainAvailable
 //-----------------------------------------------------
 bool Camera::isAutoGainAvailable() const
