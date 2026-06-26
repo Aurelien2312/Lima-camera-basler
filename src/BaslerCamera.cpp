@@ -1570,24 +1570,6 @@ bool Camera::isBandWidthAssigned() const
 }
 
 //-----------------------------------------------------
-// isMaxThroughputAvailable
-//-----------------------------------------------------
-bool Camera::isMaxThroughputAvailable() const
-{
-    //ACE2
-    return GenApi::IsAvailable(Camera_->DeviceLinkThroughputLimit);
-}
-
-//-----------------------------------------------------
-// isCurrentThroughputAvailable
-//-----------------------------------------------------
-bool Camera::isCurrentThroughputAvailable() const
-{
-    //ACE2
-    return GenApi::IsAvailable(Camera_->BslDeviceLinkCurrentThroughput);
-}
-
-//-----------------------------------------------------
 // isAutoGainAvailable
 //-----------------------------------------------------
 bool Camera::isAutoGainAvailable() const
@@ -1611,6 +1593,15 @@ void Camera::getBandwidthAssigned(int& value)
         THROW_HW_ERROR(Error) << e.GetDescription();
     }
 }   
+
+//-----------------------------------------------------
+// isMaxThroughputAvailable
+//-----------------------------------------------------
+bool Camera::isMaxThroughputAvailable() const
+{
+    return GenApi::IsAvailable(Camera_->DeviceLinkThroughputLimit);
+}
+
 //-----------------------------------------------------
 //
 //-----------------------------------------------------
@@ -1628,6 +1619,14 @@ void Camera::getMaxThroughput(int& value)
         DEB_WARNING() << e.GetDescription();
     }
 }    
+
+//-----------------------------------------------------
+// isMaxThroughputAvailable
+//-----------------------------------------------------
+bool Camera::isCurrentThroughputAvailable() const
+{
+    return GenApi::IsAvailable(Camera_->BslDeviceLinkCurrentThroughput);
+}
 
 //-----------------------------------------------------
 //
@@ -1652,7 +1651,7 @@ void Camera::getCurrentThroughput(int& value)
 //-----------------------------------------------------
 bool Camera::isTemperatureAvailable() const
 {
-    return GenApi::IsAvailable(Camera_->TemperatureAbs);
+    return GenApi::IsAvailable(Camera_->TemperatureAbs) || GenApi::IsAvailable(Camera_->DeviceTemperature);
 }
 
 //-----------------------------------------------------
